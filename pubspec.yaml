@@ -1,0 +1,81 @@
+name: deskapp_flutter
+description: "DeskApp — Flutter Android tablet app (jewelry/chain-manufacturing ERP)."
+publish_to: 'none'
+version: 1.0.1+2
+
+environment:
+  sdk: ^3.6.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Local-first persistence (repository-backed local DB, seeded from the real
+  # MySQL dump; repositories can later be swapped for a REST-backed impl
+  # without touching UI code).
+  drift: ^2.22.1
+  sqlite3_flutter_libs: ^0.5.26
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+  # Navigation
+  go_router: ^14.6.2
+
+  # Formatting (Indian digit grouping / currency, matches legacy indianFormat())
+  intl: ^0.19.0
+
+  # Secure session/token storage (stand-in for the future auth token)
+  flutter_secure_storage: ^9.2.2
+
+  # Connectivity (Module 6 — offline/sync groundwork)
+  connectivity_plus: ^6.1.0
+
+  # Password hashing compatible with legacy PHP password_hash()/bcrypt hashes
+  # in the seeded `users` table (see database/u824831432_deskapp.sql).
+  bcrypt: ^1.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.13
+  drift_dev: ^2.22.1
+  riverpod_generator: ^2.6.3
+  custom_lint: ^0.7.0
+  riverpod_lint: ^2.6.3
+  flutter_launcher_icons: ^0.14.2
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 24
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/logo_adaptive_fg.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/logo.png
+
+  # Poppins — app typeface (thin/regular/semibold/bold). Bundled locally as
+  # static per-weight files (not fetched at runtime via google_fonts)
+  # because this is an offline-first app — see documents/map.md Module 6
+  # and the "local-first" data-layer decision.
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
