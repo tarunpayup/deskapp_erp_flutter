@@ -16,8 +16,3 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 
-## KEYSTORE
-- Keystore:      android/app/upload-keystore.jks
-- Key alias:     deskapp
-- Store password: UFgF5VfmS7JIvRsoofyh
-- Key password:   5sXeBfTqnHcTuwsPILZf
