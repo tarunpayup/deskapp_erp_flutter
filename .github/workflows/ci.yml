@@ -1,0 +1,49 @@
+name: CI
+
+# Phase 1: just prove the pipeline itself works — fetch deps, analyze, test,
+# and produce a debug build artifact. No signing/secrets required yet.
+# Once this is green, a separate "release" job (signed appbundle + upload to
+# Play Console via fastlane/upload-google-play) can be added using the
+# existing android/app/upload-keystore.jks + key.properties as GitHub secrets.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Analyze, test, build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
