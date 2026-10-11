@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
 
 import '../../../core/providers/app_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money_format.dart';
 import '../../../data/db/app_database.dart';
 import '../domain/trade_models.dart';
+import 'invoice_pdf.dart';
 import 'widgets/trader_picker_field.dart';
 
 /// Add Sale + Sales list — legacy o-tr-sales-new.php (v2 baseline, per
@@ -124,7 +126,7 @@ class _AddSaleFormState extends ConsumerState<_AddSaleForm> {
     }
     setState(() => _loading = true);
     try {
-      await ref.read(tradeRepositoryProvider).addSale(
+      final salesId = await ref.read(tradeRepositoryProvider).addSale(
         traderId: _customer!.id,
         saleDate: _date,
         lines: _lines
@@ -144,7 +146,6 @@ class _AddSaleFormState extends ConsumerState<_AddSaleForm> {
         igstPercent: double.tryParse(_igstCtrl.text.trim()) ?? 0,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sale recorded')));
         setState(() {
           _customer = null;
           _lines
@@ -155,6 +156,9 @@ class _AddSaleFormState extends ConsumerState<_AddSaleForm> {
           _overrideCtrl.clear();
         });
         _formKey.currentState?.reset();
+        if (context.mounted) {
+          await _showInvoiceDialog(context, salesId);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -163,6 +167,45 @@ class _AddSaleFormState extends ConsumerState<_AddSaleForm> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _showInvoiceDialog(BuildContext context, int salesId) async {
+    final repo = ref.read(tradeRepositoryProvider);
+    final sale = await repo.getSale(salesId);
+    if (sale == null) return;
+    final lines = await repo.getSaleLines(salesId);
+    final trader = await repo.getTrader(sale.traderId);
+    if (!context.mounted || trader == null) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sale recorded'),
+        content: Text('Invoice ${sale.salesCode} created for ${trader.traderName}.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          OutlinedButton.icon(
+            onPressed: () async {
+              final bytes = await buildSaleInvoicePdf(sale: sale, trader: trader, lines: lines);
+              await Printing.layoutPdf(onLayout: (_) async => bytes, name: '${sale.salesCode}.pdf');
+            },
+            icon: const Icon(Icons.visibility_outlined),
+            label: const Text('View'),
+          ),
+          FilledButton.icon(
+            onPressed: () async {
+              final bytes = await buildSaleInvoicePdf(sale: sale, trader: trader, lines: lines);
+              await Printing.sharePdf(bytes: bytes, filename: '${sale.salesCode}.pdf');
+            },
+            icon: const Icon(Icons.share_outlined),
+            label: const Text('Share'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -447,6 +490,16 @@ class _SalesListTab extends ConsumerWidget {
                       MoneyFormat.plain(sale.totalAfterTax),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.visibility_outlined, size: 18),
+                      tooltip: 'View invoice',
+                      onPressed: () => _viewOrShareInvoice(context, ref, sale, share: false),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.share_outlined, size: 18),
+                      tooltip: 'Share invoice',
+                      onPressed: () => _viewOrShareInvoice(context, ref, sale, share: true),
+                    ),
                     if (!sale.reversed)
                       IconButton(
                         icon: const Icon(Icons.undo, size: 18),
@@ -490,6 +543,24 @@ class _SalesListTab extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
+    }
+  }
+
+  Future<void> _viewOrShareInvoice(
+    BuildContext context,
+    WidgetRef ref,
+    SalesTableData sale, {
+    required bool share,
+  }) async {
+    final repo = ref.read(tradeRepositoryProvider);
+    final lines = await repo.getSaleLines(sale.sid);
+    final trader = await repo.getTrader(sale.traderId);
+    if (!context.mounted || trader == null) return;
+    final bytes = await buildSaleInvoicePdf(sale: sale, trader: trader, lines: lines);
+    if (share) {
+      await Printing.sharePdf(bytes: bytes, filename: '${sale.salesCode}.pdf');
+    } else {
+      await Printing.layoutPdf(onLayout: (_) async => bytes, name: '${sale.salesCode}.pdf');
     }
   }
 }

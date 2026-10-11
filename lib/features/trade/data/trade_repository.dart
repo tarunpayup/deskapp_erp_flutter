@@ -508,6 +508,12 @@ class TradeRepository {
     );
   }
 
+  Future<SalesTableData?> getSale(int salesId) {
+    return (_db.select(
+      _db.salesTable,
+    )..where((t) => t.sid.equals(salesId))).getSingleOrNull();
+  }
+
   Future<List<SalesLineItemsTableData>> getSaleLines(int salesId) {
     return (_db.select(
       _db.salesLineItemsTable,

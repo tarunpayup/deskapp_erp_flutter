@@ -93,7 +93,7 @@ class _JobRow extends ConsumerWidget {
         ],
       ),
       subtitle: Text(
-        'Allotted: ${job.quantity.toStringAsFixed(2)} • Received: ${job.quantityRec.toStringAsFixed(2)}',
+        'Allotted: ${job.quantity.toStringAsFixed(3)} • Received: ${job.quantityRec.toStringAsFixed(3)}',
       ),
       trailing: Chip(
         label: Text(job.status),
@@ -176,7 +176,7 @@ class _JobDetailSheetState extends ConsumerState<_JobDetailSheet> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text('Allotted: ${job.quantity.toStringAsFixed(2)} • Received: ${job.quantityRec.toStringAsFixed(2)}'),
+              Text('Allotted: ${job.quantity.toStringAsFixed(3)} • Received: ${job.quantityRec.toStringAsFixed(3)}'),
               const SizedBox(height: 16),
               if (job.status == 'Open') ...[
                 Wrap(
@@ -343,7 +343,7 @@ class _JobDetailSheetState extends ConsumerState<_JobDetailSheet> {
                     child: TextField(
                       controller: controllers[l.id],
                       decoration: InputDecoration(
-                        labelText: 'Qty received (pending: ${(l.qtyAllotted - l.qtyReceived).toStringAsFixed(2)})',
+                        labelText: 'Qty received (pending: ${(l.qtyAllotted - l.qtyReceived).toStringAsFixed(3)})',
                       ),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     ),
@@ -416,7 +416,7 @@ class _AllotmentHistory extends ConsumerWidget {
                   .map(
                     (a) => ListTile(
                       dense: true,
-                      title: Text('Weight: ${a.weight.toStringAsFixed(2)}'),
+                      title: Text('Weight: ${a.weight.toStringAsFixed(3)}'),
                       subtitle: Text(
                         '${a.allotDate.year}-${a.allotDate.month.toString().padLeft(2, '0')}-${a.allotDate.day.toString().padLeft(2, '0')}',
                       ),
@@ -452,7 +452,7 @@ class _ReceiptHistory extends ConsumerWidget {
                       title: Text('Credited: ₹${r.amountCredited.toStringAsFixed(2)}'),
                       subtitle: Text(
                         r.weightReceived != null
-                            ? 'Received: ${r.weightReceived!.toStringAsFixed(2)} • Net: ${r.receiveValue?.toStringAsFixed(2)}'
+                            ? 'Received: ${r.weightReceived!.toStringAsFixed(3)} • Net: ${r.receiveValue?.toStringAsFixed(2)}'
                             : '${r.receiveDate.year}-${r.receiveDate.month.toString().padLeft(2, '0')}-${r.receiveDate.day.toString().padLeft(2, '0')}',
                       ),
                     ),

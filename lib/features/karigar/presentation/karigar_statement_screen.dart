@@ -89,11 +89,11 @@ class _StatementBody extends ConsumerWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _Kpi(label: 'Weight Allotted', value: s.weightAllotted.toStringAsFixed(2))),
+              Expanded(child: _Kpi(label: 'Weight Allotted', value: s.weightAllotted.toStringAsFixed(3))),
               const SizedBox(width: 12),
-              Expanded(child: _Kpi(label: 'Weight Received', value: s.weightReceived.toStringAsFixed(2))),
+              Expanded(child: _Kpi(label: 'Weight Received', value: s.weightReceived.toStringAsFixed(3))),
               const SizedBox(width: 12),
-              Expanded(child: _Kpi(label: 'Weight Pending', value: s.weightPending.toStringAsFixed(2))),
+              Expanded(child: _Kpi(label: 'Weight Pending', value: s.weightPending.toStringAsFixed(3))),
             ],
           ),
           const SizedBox(height: 12),

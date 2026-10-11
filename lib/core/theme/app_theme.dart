@@ -1,6 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
+
+/// Plays the platform click sound whenever a button/InkWell-based widget
+/// is tapped, by hooking the shared Material splash factory (set as
+/// `ThemeData.splashFactory` below) instead of touching every button call
+/// site individually — there's no custom button widget in this app, so
+/// this is the one place that reaches all of them.
+class _ClickSoundInkSplashFactory extends InteractiveInkFeatureFactory {
+  const _ClickSoundInkSplashFactory();
+
+  @override
+  InteractiveInkFeature create({
+    required MaterialInkController controller,
+    required RenderBox referenceBox,
+    required Offset position,
+    required Color color,
+    required TextDirection textDirection,
+    bool containedInkWell = false,
+    RectCallback? rectCallback,
+    BorderRadius? borderRadius,
+    ShapeBorder? customBorder,
+    double? radius,
+    VoidCallback? onRemoved,
+  }) {
+    SystemSound.play(SystemSoundType.click);
+    return InkRipple.splashFactory.create(
+      controller: controller,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      textDirection: textDirection,
+      containedInkWell: containedInkWell,
+      rectCallback: rectCallback,
+      borderRadius: borderRadius,
+      customBorder: customBorder,
+      radius: radius,
+      onRemoved: onRemoved,
+    );
+  }
+}
 
 /// App-wide Material theme reproducing the legacy DeskApp admin theme's
 /// look (heading color #202342, primary #1b00ff, light page background
@@ -26,6 +66,7 @@ abstract class AppTheme {
       ),
       scaffoldBackgroundColor: AppColors.pageBg,
       fontFamily: _fontFamily,
+      splashFactory: const _ClickSoundInkSplashFactory(),
     );
 
     final textTheme = base.textTheme.apply(fontFamily: _fontFamily).copyWith(
